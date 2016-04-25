@@ -10,6 +10,6 @@ public class ParserTest {
     public static void main(String args[]) throws IOException{
         Parser parser = new Parser("newaa.txt");
         parser.parseCustomer("custCSV.csv");
-        parser.parseProduct("productCSV.csv");
+        //parser.parseProduct("productCSV.csv");
     }
 }
