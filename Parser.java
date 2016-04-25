@@ -140,10 +140,11 @@ public class Parser {
                     }
                 }
                 if(term.matches("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}") && 
-                   data.get(count+1).startsWith("cutomer: ") &&
+                   (data.size() - count) >= 4
+                   /*data.get(count+1).startsWith("cutomer: ") &&
                    data.get(count+2).startsWith("rating: ") &&
                    data.get(count+3).startsWith("votes: ") &&
-                   data.get(count+4).startsWith("helpful: ")){
+                   data.get(count+4).startsWith("helpful: ")*/){
                     //Date
                     String[] pieces = data.get(count).split("-");
                     if(pieces[1].length()<2){
