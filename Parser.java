@@ -3,6 +3,7 @@ package contents;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -25,6 +26,9 @@ public class Parser {
     private Customer customer;
     private List<Customer> customers = new ArrayList<Customer>();
     private Iterator<Customer> cust;
+    private Category category;
+    private List<Category> categories = new ArrayList<Category>();
+    private Iterator<Category> cat;
     private String id;
     private String asin;
     private String title;
@@ -35,6 +39,10 @@ public class Parser {
     private String rating;
     private String votes;
     private String helpful;
+    private String c;
+    private String cid;
+    private String p;
+    private String pid;
     private Pattern pattern;
     private Matcher matcher;
     private FileWriter writer;
@@ -140,7 +148,7 @@ public class Parser {
                     }
                 }
                 if(term.matches("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}") && 
-                   (data.size() - count) >= 4){
+                   (data.size() - count) > 4){
                     //Date
                     String[] pieces = data.get(count).split("-");
                     if(pieces[1].length()<2){
@@ -199,6 +207,63 @@ public class Parser {
                           next.getRating() + ',' + 
                           next.getVotes() + ',' +  
                           next.getHelpful() + '\n');
+        }
+        writer.flush();
+        writer.close();
+    }
+    public void parseCat(String csvFileName) throws IOException{
+        List = new Lexer(file).search();
+        it = List.iterator();
+        while(it.hasNext()){
+            asin = null;
+            c = null;
+            cid = null;
+            List<String> data = it.next();
+            prodData = data.iterator();
+            while(prodData.hasNext()){
+                String term = prodData.next();
+                if(term.startsWith("ASIN: ")){
+                    pattern=Pattern.compile("[0-9]+");
+                    matcher = pattern.matcher(term);
+                    while(matcher.find()){
+                        id = matcher.group();
+                    }
+                }
+                if(term.startsWith("|")){
+                    String[] pieces = term.split("\\|");
+                    pattern=Pattern.compile("[^\n]+(?=\\[\\d+\\])");
+                    matcher = pattern.matcher(pieces[pieces.length-1]);
+                    while(matcher.find()){
+                        c = matcher.group();
+                    }
+                    pattern=Pattern.compile("(?<=\\[)(\\d+)(?=\\])");
+                    matcher = pattern.matcher(pieces[pieces.length-1]);
+                    while(matcher.find()){
+                        cid = matcher.group();
+                    }
+                    for(String i: pieces.subList(0,pieces.length-1)){
+                        
+                    }
+                }
+                if(id != null && c !=null && cid != null){
+                    category = new Category(id,c,cid);
+                    if(categories.size() == 0){
+                        categories.add(category);
+                    }
+                    else if(category.getCid() != categories.get(categories.size()-1).getCid()){
+                        categories.add(category);
+                    }
+                }
+            }
+        }
+        writer = new FileWriter(csvFileName);
+        writer.append("asin,c,cid\n");
+        cat = categories.iterator();
+        while(cat.hasNext()){
+            Category next = cat.next();
+            writer.append(next.getAsin() + ',' + 
+                          next.getC() + ',' + 
+                          next.getCid() + '\n');
         }
         writer.flush();
         writer.close();

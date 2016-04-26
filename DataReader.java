@@ -26,7 +26,7 @@ public class DataReader {
      * @throws IOException
      */
     public String read() throws IOException{
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new FileReader("data/" + file));
         while ((line = reader.readLine()) != null) {
             total.append(line+"\n");
         }
