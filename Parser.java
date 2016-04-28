@@ -3,7 +3,6 @@ package contents;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -29,6 +28,9 @@ public class Parser {
     private Category category;
     private List<Category> categories = new ArrayList<Category>();
     private Iterator<Category> cat;
+    private ParentCategory categoryP;
+    private List<ParentCategory> categoriesP = new ArrayList<ParentCategory>();
+    private Iterator<ParentCategory> pat;
     private String id;
     private String asin;
     private String title;
@@ -87,8 +89,9 @@ public class Parser {
                     matcher = pattern.matcher(term);
                     while(matcher.find()){
                         title = matcher.group();
+                        title = title.replace(",",";");
+                        title = title.replace("\"","'");
                     }
-                    title = title.replace("\"","'");
                 }
                 if(term.startsWith("group: ")){
                     pattern=Pattern.compile("(?<=group: )[^\n]+");
@@ -211,7 +214,7 @@ public class Parser {
         writer.flush();
         writer.close();
     }
-    public void parseCat(String csvFileName) throws IOException{
+    public void parseCat(String csvFileNameCAT,String csvFileNamePAT) throws IOException{
         List = new Lexer(file).search();
         it = List.iterator();
         while(it.hasNext()){
@@ -235,14 +238,30 @@ public class Parser {
                     matcher = pattern.matcher(pieces[pieces.length-1]);
                     while(matcher.find()){
                         c = matcher.group();
+                        c = c.replace(",",";");
                     }
                     pattern=Pattern.compile("(?<=\\[)(\\d+)(?=\\])");
                     matcher = pattern.matcher(pieces[pieces.length-1]);
                     while(matcher.find()){
                         cid = matcher.group();
                     }
-                    for(String i: pieces.subList(0,pieces.length-1)){
-                        
+                    int i;
+                    String child=cid;
+                    for(i=pieces.length-2; i > 0; i--){
+                        pattern=Pattern.compile("[^\n]+(?=\\[\\d+\\])");
+                        matcher = pattern.matcher(pieces[i]);
+                        while(matcher.find()){
+                            p = matcher.group();
+                            p = p.replace(",",";");
+                        }
+                        pattern=Pattern.compile("(?<=\\[)(\\d+)(?=\\])");
+                        matcher = pattern.matcher(pieces[i]);
+                        while(matcher.find()){
+                            pid = matcher.group();
+                        }
+                        categoryP = new ParentCategory(child,p,pid);
+                        categoriesP.add(categoryP);
+                        child=pid;
                     }
                 }
                 if(id != null && c !=null && cid != null){
@@ -256,7 +275,7 @@ public class Parser {
                 }
             }
         }
-        writer = new FileWriter(csvFileName);
+        writer = new FileWriter(csvFileNameCAT);
         writer.append("asin,c,cid\n");
         cat = categories.iterator();
         while(cat.hasNext()){
@@ -266,6 +285,15 @@ public class Parser {
                           next.getCid() + '\n');
         }
         writer.flush();
+        writer = new FileWriter(csvFileNamePAT);
+        writer.append("cid,p,pid\n");
+        pat = categoriesP.iterator();
+        while(pat.hasNext()){
+            ParentCategory next = pat.next();
+            writer.append(next.getCid() + ',' + 
+                          next.getP() + ',' + 
+                          next.getPid() + '\n');
+        }
         writer.close();
     }
 }
